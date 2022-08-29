@@ -1,0 +1,34 @@
+#include <ros/ros.h>
+#include <string> 
+#include <iostream> 
+#include <sensor_msgs/Imu.h> 
+using namespace std;
+
+ros::Publisher imu_pub;
+
+void imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
+{ 
+    sensor_msgs:: Imu imu_data;
+    imu_data.header.stamp = msg->header.stamp;
+    imu_data.header.frame_id = "base_link";
+    imu_data.orientation = msg->orientation;
+    imu_data.orientation_covariance = msg->orientation_covariance;
+    imu_data.angular_velocity = msg->angular_velocity;
+    imu_data.angular_velocity_covariance = msg->angular_velocity_covariance;
+    imu_data.linear_acceleration = msg->linear_acceleration;
+    imu_data.linear_acceleration_covariance = msg->linear_acceleration_covariance;
+    imu_pub.publish(imu_data);
+}  
+
+int main(int argc, char **argv)
+{ 
+    ros::init(argc, argv, "republish_frameid_imu");
+    cout << "republish_frameid_imu start" << endl;
+
+    ros::NodeHandle nh_;
+    imu_pub = nh_.advertise<sensor_msgs::Imu>("/imu/reframe_id", 10);
+    ros::Subscriber imu_sub = nh_.subscribe("/imu_filtered", 10, imu_callback); 
+
+    ros::spin(); 
+    return 0; 
+}
